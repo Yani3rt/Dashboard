@@ -33,34 +33,34 @@
 }
 
 :root[data-theme="dark"] {
-  --background: 240 10% 3.9%;
-  --foreground: 0 0% 98%;
-  --card: 240 10% 3.9%;
+  --background: 232 42% 7%;
+  --foreground: 210 20% 96%;
+  --card: 231 31% 11%;
   --card-foreground: 0 0% 98%;
-  --popover: 240 10% 3.9%;
+  --popover: 231 31% 11%;
   --popover-foreground: 0 0% 98%;
-  --primary: 0 0% 98%;
-  --primary-foreground: 240 5.9% 10%;
-  --secondary: 240 3.7% 15.9%;
-  --secondary-foreground: 0 0% 98%;
-  --muted: 240 3.7% 15.9%;
-  --muted-foreground: 240 5% 64.9%;
-  --accent: 240 3.7% 15.9%;
-  --accent-foreground: 0 0% 98%;
+  --primary: 188 95% 56%;
+  --primary-foreground: 227 39% 10%;
+  --secondary: 232 24% 18%;
+  --secondary-foreground: 210 20% 96%;
+  --muted: 231 24% 17%;
+  --muted-foreground: 217 15% 68%;
+  --accent: 228 23% 19%;
+  --accent-foreground: 210 20% 96%;
   --destructive: 0 62.8% 30.6%;
   --destructive-foreground: 0 0% 98%;
-  --border: 240 3.7% 15.9%;
-  --input: 240 3.7% 15.9%;
-  --ring: 240 4.9% 83.9%;
+  --border: 230 21% 20%;
+  --input: 230 21% 20%;
+  --ring: 188 95% 56%;
 
-  --sidebar-background: 240 5.9% 10%;
-  --sidebar-foreground: 240 4.8% 95.9%;
-  --sidebar-primary: 224.3 76.3% 48%;
+  --sidebar-background: 229 30% 10%;
+  --sidebar-foreground: 214 20% 95%;
+  --sidebar-primary: 188 95% 56%;
   --sidebar-primary-foreground: 0 0% 100%;
-  --sidebar-accent: 240 3.7% 15.9%;
-  --sidebar-accent-foreground: 240 4.8% 95.9%;
-  --sidebar-border: 240 3.7% 15.9%;
-  --sidebar-ring: 217.2 91.2% 59.8%;
+  --sidebar-accent: 229 25% 17%;
+  --sidebar-accent-foreground: 214 20% 95%;
+  --sidebar-border: 230 21% 20%;
+  --sidebar-ring: 188 95% 56%;
 }
 
 @theme inline {
@@ -106,6 +106,10 @@ body {
 
 body {
   background-color: hsl(var(--background));
+  background-image:
+    radial-gradient(1200px 700px at -10% -20%, hsl(192 100% 60% / 0.13), transparent 45%),
+    radial-gradient(1000px 680px at 115% -10%, hsl(238 100% 70% / 0.13), transparent 42%);
+  background-attachment: fixed;
   color: hsl(var(--foreground));
   font-family: "Geist", "Geist Fallback", ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   font-feature-settings: "rlig" 1, "calt" 1;
@@ -119,6 +123,9 @@ a {
 
 .content {
   padding: 1rem;
+  width: 100%;
+  max-width: 1180px;
+  margin: 0 auto;
 }
 
 .dashboard-grid {
@@ -128,11 +135,13 @@ a {
 }
 
 .card {
-  border: 1px solid hsl(var(--border));
+  border: 1px solid hsl(var(--border) / 0.8);
   border-radius: var(--radius);
-  background: hsl(var(--card));
+  background: hsl(var(--card) / 0.84);
   color: hsl(var(--card-foreground));
   padding: 1rem;
+  box-shadow: 0 24px 54px hsl(224 54% 5% / 0.28), inset 0 1px 0 hsl(210 16% 98% / 0.04);
+  backdrop-filter: blur(8px);
 }
 
 .hero {
@@ -203,9 +212,9 @@ a {
   flex-direction: column;
   gap: 0.75rem;
   justify-content: space-between;
-  border: 1px solid hsl(var(--border));
+  border: 1px solid hsl(var(--border) / 0.8);
   border-radius: calc(var(--radius) - 2px);
-  background: hsl(var(--card));
+  background: hsl(var(--card) / 0.72);
   padding: 0.75rem;
 }
 
@@ -227,9 +236,9 @@ a {
 }
 
 .note-card {
-  border: 1px solid hsl(var(--border));
+  border: 1px solid hsl(var(--border) / 0.8);
   border-radius: calc(var(--radius) - 2px);
-  background: hsl(var(--card));
+  background: hsl(var(--card) / 0.72);
   padding: 0.75rem;
 }
 

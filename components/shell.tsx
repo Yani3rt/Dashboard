@@ -25,7 +25,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -405,9 +405,9 @@ const ShellLayout = ({ children }: { children: React.ReactNode }) => {
       </Sidebar>
 
       <SidebarInset>
-        <header className="flex items-center gap-3 border-b border-border/70 p-4">
+        <header className="sticky top-0 z-20 flex h-14 items-center gap-3 border-b border-border/60 bg-background/70 px-4 backdrop-blur supports-[backdrop-filter]:bg-background/55">
           <SidebarTrigger />
-          <div className="text-sm text-muted-foreground">Command center</div>
+          <div className="text-sm font-medium text-muted-foreground">Command center</div>
         </header>
         <main className="content">{children}</main>
       </SidebarInset>
@@ -416,6 +416,9 @@ const ShellLayout = ({ children }: { children: React.ReactNode }) => {
         <DialogContent className="modal-card">
           <DialogHeader className="modal-header">
             <DialogTitle>Command Palette</DialogTitle>
+            <DialogDescription>
+              Search actions, navigate sections, and create tasks, notes, or habits without leaving the keyboard.
+            </DialogDescription>
           </DialogHeader>
           <div className="palette-shortcuts">
             <Button type="button" variant="ghost" onClick={() => setPaletteMode("actions")}><Search size={14} />Actions</Button>
@@ -441,6 +444,9 @@ const QuickCapture = ({ open, onOpenChange }: { open: boolean; onOpenChange: (op
       <DialogContent className="modal-card">
         <DialogHeader className="modal-header">
           <DialogTitle>Quick Capture Inbox</DialogTitle>
+          <DialogDescription>
+            Capture a thought quickly and save it as either a task or a note.
+          </DialogDescription>
         </DialogHeader>
         <Textarea value={text} onChange={(event) => setText(event.target.value)} rows={5} placeholder="Capture thought, task, or note..." />
         <div className="modal-actions">
