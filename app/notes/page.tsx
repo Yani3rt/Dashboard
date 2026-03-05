@@ -1,0 +1,113 @@
+"use client";
+
+import { FormEvent, useMemo, useState } from "react";
+import { Filter, NotebookPen, Pin, Search, Tags } from "lucide-react";
+import ReactMarkdown from "react-markdown";
+import { NoteList } from "@/components/note-list";
+import { useDashboard } from "@/lib/state/dashboard-context";
+
+export default function NotesPage() {
+  const { state, addNote } = useDashboard();
+  const [title, setTitle] = useState("");
+  const [content, setContent] = useState("");
+  const [tagsInput, setTagsInput] = useState("");
+  const [search, setSearch] = useState("");
+  const [activeTag, setActiveTag] = useState<string>("all");
+  const [pinnedOnly, setPinnedOnly] = useState(false);
+
+  const allTags = useMemo(() => {
+    const set = new Set<string>();
+    state.notes.forEach((note) => {
+      note.tags.forEach((tag) => set.add(tag));
+    });
+    return [...set].sort((a, b) => a.localeCompare(b));
+  }, [state.notes]);
+
+  const filteredNotes = useMemo(() => {
+    const q = search.trim().toLowerCase();
+    return state.notes.filter((note) => {
+      const matchesQuery =
+        q.length === 0 || `${note.title ?? ""} ${note.content} ${note.tags.join(" ")}`.toLowerCase().includes(q);
+      const matchesTag = activeTag === "all" || note.tags.includes(activeTag);
+      const matchesPin = !pinnedOnly || note.pinned;
+      return matchesQuery && matchesTag && matchesPin;
+    });
+  }, [activeTag, pinnedOnly, search, state.notes]);
+
+  const onSubmit = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    if (!content.trim()) {
+      return;
+    }
+
+    const tags = tagsInput
+      .split(",")
+      .map((tag) => tag.trim().toLowerCase())
+      .filter(Boolean);
+
+    addNote(content.trim(), title.trim() || undefined, tags);
+    setTitle("");
+    setContent("");
+    setTagsInput("");
+  };
+
+  return (
+    <div className="stack-page">
+      <section className="card">
+        <h2><NotebookPen size={18} /> Quick Notes</h2>
+        <form className="stack-form" onSubmit={onSubmit}>
+          <input value={title} onChange={(event) => setTitle(event.target.value)} placeholder="Title (optional)" />
+          <input
+            value={tagsInput}
+            onChange={(event) => setTagsInput(event.target.value)}
+            placeholder="tags,comma,separated"
+          />
+          <div className="editor-split">
+            <textarea
+              rows={10}
+              value={content}
+              onChange={(event) => setContent(event.target.value)}
+              placeholder="Write markdown notes..."
+            />
+            <div className="preview-panel">
+              <h4><Filter size={14} /> Live Preview</h4>
+              <div className="markdown-body">
+                <ReactMarkdown>{content || "Start typing markdown to preview..."}</ReactMarkdown>
+              </div>
+            </div>
+          </div>
+          <button type="submit">Save Note</button>
+        </form>
+      </section>
+
+      <section className="card">
+        <div className="notes-toolbar">
+          <div className="input-with-icon">
+            <Search size={14} />
+          <input
+            value={search}
+            onChange={(event) => setSearch(event.target.value)}
+            placeholder="Search notes, content, tags"
+          />
+          </div>
+          <div className="input-with-icon">
+            <Tags size={14} />
+          <select value={activeTag} onChange={(event) => setActiveTag(event.target.value)}>
+            <option value="all">All tags</option>
+            {allTags.map((tag) => (
+              <option key={tag} value={tag}>
+                #{tag}
+              </option>
+            ))}
+          </select>
+          </div>
+          <button type="button" onClick={() => setPinnedOnly((current) => !current)}>
+            <Pin size={14} />
+            {pinnedOnly ? "Showing pinned" : "Show pinned only"}
+          </button>
+        </div>
+        <NoteList notes={filteredNotes} />
+      </section>
+    </div>
+  );
+}
