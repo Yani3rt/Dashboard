@@ -4,6 +4,17 @@ import { FormEvent, useMemo, useState } from "react";
 import { Filter, NotebookPen, Pin, Search, Tags } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import { NoteList } from "@/components/note-list";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Textarea } from "@/components/ui/textarea";
 import { useDashboard } from "@/lib/state/dashboard-context";
 
 export default function NotesPage() {
@@ -36,9 +47,7 @@ export default function NotesPage() {
 
   const onSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    if (!content.trim()) {
-      return;
-    }
+    if (!content.trim()) return;
 
     const tags = tagsInput
       .split(",")
@@ -54,29 +63,33 @@ export default function NotesPage() {
   return (
     <div className="stack-page">
       <section className="card">
-        <h2><NotebookPen size={18} /> Quick Notes</h2>
+        <h2>
+          <NotebookPen size={18} /> Quick Notes
+        </h2>
         <form className="stack-form" onSubmit={onSubmit}>
-          <input value={title} onChange={(event) => setTitle(event.target.value)} placeholder="Title (optional)" />
-          <input
+          <Input value={title} onChange={(event) => setTitle(event.target.value)} placeholder="Title (optional)" />
+          <Input
             value={tagsInput}
             onChange={(event) => setTagsInput(event.target.value)}
             placeholder="tags,comma,separated"
           />
           <div className="editor-split">
-            <textarea
+            <Textarea
               rows={10}
               value={content}
               onChange={(event) => setContent(event.target.value)}
               placeholder="Write markdown notes..."
             />
             <div className="preview-panel">
-              <h4><Filter size={14} /> Live Preview</h4>
+              <h4>
+                <Filter size={14} /> Live Preview
+              </h4>
               <div className="markdown-body">
                 <ReactMarkdown>{content || "Start typing markdown to preview..."}</ReactMarkdown>
               </div>
             </div>
           </div>
-          <button type="submit">Save Note</button>
+          <Button type="submit">Save Note</Button>
         </form>
       </section>
 
@@ -84,27 +97,38 @@ export default function NotesPage() {
         <div className="notes-toolbar">
           <div className="input-with-icon">
             <Search size={14} />
-          <input
-            value={search}
-            onChange={(event) => setSearch(event.target.value)}
-            placeholder="Search notes, content, tags"
-          />
+            <Input
+              className="h-9 border-0 bg-transparent"
+              value={search}
+              onChange={(event) => setSearch(event.target.value)}
+              placeholder="Search notes, content, tags"
+            />
           </div>
           <div className="input-with-icon">
             <Tags size={14} />
-          <select value={activeTag} onChange={(event) => setActiveTag(event.target.value)}>
-            <option value="all">All tags</option>
-            {allTags.map((tag) => (
-              <option key={tag} value={tag}>
-                #{tag}
-              </option>
-            ))}
-          </select>
+            <Select value={activeTag} onValueChange={setActiveTag}>
+              <SelectTrigger className="h-9 border-0 bg-transparent">
+                <SelectValue placeholder="All tags" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All tags</SelectItem>
+                {allTags.map((tag) => (
+                  <SelectItem key={tag} value={tag}>
+                    #{tag}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
-          <button type="button" onClick={() => setPinnedOnly((current) => !current)}>
+          <Button type="button" variant={pinnedOnly ? "default" : "outline"} onClick={() => setPinnedOnly((current) => !current)}>
             <Pin size={14} />
             {pinnedOnly ? "Showing pinned" : "Show pinned only"}
-          </button>
+          </Button>
+        </div>
+        <div className="mb-3 flex flex-wrap gap-2">
+          <Badge variant="secondary">{filteredNotes.length} notes</Badge>
+          {activeTag !== "all" ? <Badge>#{activeTag}</Badge> : null}
+          {pinnedOnly ? <Badge>Pinned only</Badge> : null}
         </div>
         <NoteList notes={filteredNotes} />
       </section>

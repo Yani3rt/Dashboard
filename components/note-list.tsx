@@ -4,6 +4,8 @@ import { Pin } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import { Note } from "@/lib/domain/models";
 import { useDashboard } from "@/lib/state/dashboard-context";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 
 export const NoteList = ({ notes }: { notes: Note[] }) => {
   const { pinNote } = useDashboard();
@@ -18,11 +20,13 @@ export const NoteList = ({ notes }: { notes: Note[] }) => {
         <li key={note.id} className="note-card">
           <h4>{note.title ?? "Inbox note"}</h4>
           {note.tags.length > 0 ? (
-            <p className="note-tags">
+            <div className="note-tags">
               {note.tags.map((tag) => (
-                <span key={`${note.id}-${tag}`}>#{tag}</span>
+                <Badge key={`${note.id}-${tag}`} variant="secondary">
+                  #{tag}
+                </Badge>
               ))}
-            </p>
+            </div>
           ) : null}
           <div className="markdown-body">
             <ReactMarkdown
@@ -37,10 +41,10 @@ export const NoteList = ({ notes }: { notes: Note[] }) => {
               {note.content}
             </ReactMarkdown>
           </div>
-          <button type="button" onClick={() => pinNote(note.id)}>
+          <Button type="button" variant="outline" onClick={() => pinNote(note.id)}>
             <Pin size={14} />
             {note.pinned ? "Unpin" : "Pin"}
-          </button>
+          </Button>
         </li>
       ))}
     </ul>

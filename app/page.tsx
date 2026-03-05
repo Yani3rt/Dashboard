@@ -1,6 +1,9 @@
 "use client";
 
 import { FormEvent, useMemo, useState } from "react";
+import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { HabitList } from "@/components/habit-list";
 import { NoteList } from "@/components/note-list";
 import { TaskList, taskViews } from "@/components/task-list";
@@ -23,34 +26,28 @@ export default function HomePage() {
 
   const submitTask = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    if (!taskTitle.trim()) {
-      return;
-    }
+    if (!taskTitle.trim()) return;
     addTask({ title: taskTitle.trim(), dueDate: todayKey(), priority: "high" });
     setTaskTitle("");
   };
 
   const submitHabit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    if (!habitName.trim()) {
-      return;
-    }
+    if (!habitName.trim()) return;
     addHabit(habitName.trim());
     setHabitName("");
   };
 
   const submitNote = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    if (!noteText.trim()) {
-      return;
-    }
+    if (!noteText.trim()) return;
     addNote(noteText.trim());
     setNoteText("");
   };
 
   return (
     <div className="dashboard-grid">
-      <section className="hero card">
+      <Card className="hero card">
         <h2>Today Hub</h2>
         <p>{new Date().toLocaleDateString(undefined, { weekday: "long", month: "long", day: "numeric" })}</p>
         <div className="progress-wrap">
@@ -63,48 +60,40 @@ export default function HomePage() {
             <p>{state.habits.length} active habits.</p>
           </div>
         </div>
-      </section>
+      </Card>
 
-      <section className="card">
+      <Card className="card">
         <div className="section-head">
           <h3>Today Tasks</h3>
         </div>
         <form onSubmit={submitTask} className="inline-form">
-          <input
-            value={taskTitle}
-            onChange={(event) => setTaskTitle(event.target.value)}
-            placeholder="Add a priority task"
-          />
-          <button type="submit">Add</button>
+          <Input value={taskTitle} onChange={(event) => setTaskTitle(event.target.value)} placeholder="Add a priority task" />
+          <Button type="submit">Add</Button>
         </form>
         <TaskList tasks={todayTasks} />
-      </section>
+      </Card>
 
-      <section className="card">
+      <Card className="card">
         <div className="section-head">
           <h3>Habits</h3>
         </div>
         <form onSubmit={submitHabit} className="inline-form">
-          <input
-            value={habitName}
-            onChange={(event) => setHabitName(event.target.value)}
-            placeholder="Add daily habit"
-          />
-          <button type="submit">Create</button>
+          <Input value={habitName} onChange={(event) => setHabitName(event.target.value)} placeholder="Add daily habit" />
+          <Button type="submit">Create</Button>
         </form>
         <HabitList habits={state.habits} />
-      </section>
+      </Card>
 
-      <section className="card">
+      <Card className="card">
         <div className="section-head">
           <h3>Quick Notes</h3>
         </div>
         <form onSubmit={submitNote} className="inline-form">
-          <input value={noteText} onChange={(event) => setNoteText(event.target.value)} placeholder="Capture a note" />
-          <button type="submit">Save</button>
+          <Input value={noteText} onChange={(event) => setNoteText(event.target.value)} placeholder="Capture a note" />
+          <Button type="submit">Save</Button>
         </form>
         <NoteList notes={state.notes.slice(0, 4)} />
-      </section>
+      </Card>
     </div>
   );
 }

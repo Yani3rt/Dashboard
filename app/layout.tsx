@@ -15,7 +15,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" data-theme="dark">
-      <body>
+      <body className="min-h-screen">
         <Providers>
           <AppShell>{children}</AppShell>
         </Providers>

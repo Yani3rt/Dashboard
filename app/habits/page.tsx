@@ -1,6 +1,9 @@
 "use client";
 
 import { FormEvent, useState } from "react";
+import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { HabitList } from "@/components/habit-list";
 import { useDashboard } from "@/lib/state/dashboard-context";
 
@@ -10,25 +13,23 @@ export default function HabitsPage() {
 
   const onSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    if (!name.trim()) {
-      return;
-    }
+    if (!name.trim()) return;
     addHabit(name.trim());
     setName("");
   };
 
   return (
     <div className="stack-page">
-      <section className="card">
+      <Card className="card">
         <h2>Habit Tracker</h2>
         <form className="inline-form" onSubmit={onSubmit}>
-          <input value={name} onChange={(event) => setName(event.target.value)} placeholder="Add a daily habit" />
-          <button type="submit">Create Habit</button>
+          <Input value={name} onChange={(event) => setName(event.target.value)} placeholder="Add a daily habit" />
+          <Button type="submit">Create Habit</Button>
         </form>
-      </section>
-      <section className="card">
+      </Card>
+      <Card className="card">
         <HabitList habits={state.habits} />
-      </section>
+      </Card>
     </div>
   );
 }

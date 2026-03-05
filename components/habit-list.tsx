@@ -1,6 +1,7 @@
 "use client";
 
 import { CalendarCheck2, Undo2 } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { todayKey } from "@/lib/domain/date";
 import { Habit } from "@/lib/domain/models";
 import { useDashboard } from "@/lib/state/dashboard-context";
@@ -40,10 +41,10 @@ export const HabitList = ({ habits }: { habits: Habit[] }) => {
               </p>
             </div>
             <div className="row-actions">
-              <button type="button" onClick={() => toggleHabitForToday(habit.id)}>
+              <Button type="button" variant="secondary" size="sm" onClick={() => toggleHabitForToday(habit.id)}>
                 {doneToday ? <Undo2 size={14} /> : <CalendarCheck2 size={14} />}
                 {doneToday ? "Undo today" : "Mark today"}
-              </button>
+              </Button>
             </div>
           </li>
         );

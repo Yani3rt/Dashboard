@@ -3,6 +3,17 @@
 import { ChangeEvent, useState } from "react";
 import { BackupPayload } from "@/lib/domain/models";
 import { useDashboard } from "@/lib/state/dashboard-context";
+import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 export default function SettingsPage() {
   const { state, setTheme, exportBackup, importBackup, resetAll } = useDashboard();
@@ -24,9 +35,7 @@ export default function SettingsPage() {
 
   const onImport = async (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
-    if (!file) {
-      return;
-    }
+    if (!file) return;
 
     const text = await file.text();
     try {
@@ -40,24 +49,29 @@ export default function SettingsPage() {
 
   return (
     <div className="stack-page">
-      <section className="card">
+      <Card className="card">
         <h2>Settings</h2>
         <div className="stack-form">
           <label htmlFor="theme">Theme</label>
-          <select id="theme" value={state.theme} onChange={(event) => setTheme(event.target.value as "dark" | "light")}>
-            <option value="dark">Dark</option>
-            <option value="light">Light</option>
-          </select>
-          <button type="button" onClick={onExport}>
+          <Select value={state.theme} onValueChange={(value: "dark" | "light") => setTheme(value)}>
+            <SelectTrigger id="theme">
+              <SelectValue placeholder="Theme" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="dark">Dark</SelectItem>
+              <SelectItem value="light">Light</SelectItem>
+            </SelectContent>
+          </Select>
+          <Button type="button" onClick={onExport}>
             Export Backup
-          </button>
-          <input type="file" accept="application/json" onChange={onImport} />
-          <button type="button" onClick={resetAll}>
+          </Button>
+          <Input type="file" accept="application/json" onChange={onImport} />
+          <Button type="button" variant="outline" onClick={resetAll}>
             Reset Local Data
-          </button>
+          </Button>
         </div>
-        {message ? <p>{message}</p> : null}
-      </section>
+        {message ? <Badge className="mt-3">{message}</Badge> : null}
+      </Card>
     </div>
   );
 }
