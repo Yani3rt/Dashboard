@@ -18,9 +18,10 @@ interface PersistedState {
 
 const normalizeState = (raw: AppState): AppState => ({
   ...raw,
-  notes: raw.notes.map((note) => ({
+  notes: raw.notes.map((note, index) => ({
     ...note,
     tags: Array.isArray(note.tags) ? note.tags : [],
+    order: typeof note.order === "number" ? note.order : index,
   })),
 });
 

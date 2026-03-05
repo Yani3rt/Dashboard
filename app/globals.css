@@ -240,11 +240,89 @@ a {
   border-radius: calc(var(--radius) - 2px);
   background: hsl(var(--card) / 0.72);
   padding: 0.75rem;
+  display: flex;
+  flex-direction: column;
+  min-height: 210px;
+}
+
+.note-card-dragging {
+  opacity: 0.55;
+}
+
+.note-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.note-preview {
+  margin-top: 0.5rem;
+  border: 1px solid hsl(var(--border) / 0.6);
+  border-radius: calc(var(--radius) - 4px);
+  background: hsl(var(--muted) / 0.3);
+  padding: 0.65rem;
+  min-height: 92px;
+  cursor: pointer;
+}
+
+.note-preview p {
+  margin: 0;
+  color: hsl(var(--muted-foreground));
+  font-size: 0.875rem;
+  line-height: 1.45;
+  display: -webkit-box;
+  -webkit-line-clamp: 4;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 
 .modal-card {
   width: 100%;
   max-width: 42rem;
+}
+
+.note-create-modal {
+  width: min(94vw, 1100px);
+  max-width: 1100px;
+}
+
+.note-create-form {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  margin: 0;
+  gap: 0.75rem;
+}
+
+.note-create-form .editor-split {
+  flex: 1;
+  min-height: 360px;
+}
+
+.note-create-form textarea {
+  height: 100%;
+  min-height: 360px;
+}
+
+.note-create-form .preview-panel {
+  height: 100%;
+  min-height: 360px;
+  overflow: auto;
+}
+
+.note-create-actions {
+  position: sticky;
+  bottom: -1rem;
+  z-index: 10;
+  margin-top: auto;
+  padding-top: 0.75rem;
+  padding-bottom: 0.75rem;
+  background: linear-gradient(to top, hsl(var(--card)) 70%, hsl(var(--card) / 0));
+}
+
+.note-create-actions .inline-flex {
+  width: 100%;
 }
 
 .modal-header,
@@ -364,6 +442,17 @@ a {
   margin-bottom: 0.75rem;
 }
 
+.notes-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.notes-actions > button:last-child {
+  margin-left: 0.25rem;
+}
+
 .input-with-icon {
   display: flex;
   align-items: center;
@@ -419,6 +508,12 @@ a {
   }
 
   .notes-toolbar {
-    grid-template-columns: 1.2fr 0.7fr auto;
+    grid-template-columns: minmax(260px, 1.2fr) minmax(180px, 0.7fr) auto;
+    align-items: center;
+  }
+
+  .notes-actions {
+    justify-content: flex-end;
+    flex-wrap: nowrap;
   }
 }

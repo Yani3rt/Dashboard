@@ -10,6 +10,10 @@ const Harness = () => {
     updateTaskStatus,
     addHabit,
     toggleHabitForToday,
+    addNote,
+    updateNote,
+    deleteNote,
+    reorderNotes,
     exportBackup,
     importBackup,
   } = useDashboard();
@@ -32,6 +36,43 @@ const Harness = () => {
       </button>
       <button onClick={() => addHabit("Workout")} type="button">
         add habit
+      </button>
+      <button onClick={() => addNote("Initial note", "Draft", ["inbox"])} type="button">
+        add note
+      </button>
+      <button
+        onClick={() => {
+          const first = state.notes[0];
+          if (first) {
+            updateNote(first.id, { title: "Edited", content: "Edited note body", tags: ["edited"] });
+          }
+        }}
+        type="button"
+      >
+        edit note
+      </button>
+      <button
+        onClick={() => {
+          const first = state.notes[0];
+          if (first) {
+            deleteNote(first.id);
+          }
+        }}
+        type="button"
+      >
+        delete note
+      </button>
+      <button
+        onClick={() => {
+          const first = state.notes[0];
+          const second = state.notes[1];
+          if (first && second) {
+            reorderNotes(first.id, second.id, state.notes.map((note) => note.id));
+          }
+        }}
+        type="button"
+      >
+        reorder notes
       </button>
       <button
         onClick={() => {
@@ -78,6 +119,9 @@ const Harness = () => {
       </button>
       <p data-testid="task-status">{state.tasks[0]?.status ?? "none"}</p>
       <p data-testid="habit-streak">{state.habits[0]?.currentStreak ?? 0}</p>
+      <p data-testid="note-title">{state.notes[0]?.title ?? "none"}</p>
+      <p data-testid="note-count">{state.notes.length}</p>
+      <p data-testid="note-top-content">{state.notes[0]?.content ?? "none"}</p>
     </div>
   );
 };
@@ -119,5 +163,34 @@ describe("dashboard provider flows", () => {
     fireEvent.click(screen.getByRole("button", { name: "invalid import" }));
 
     expect(window.localStorage.getItem("invalid-import")).toBe("error");
+  });
+
+  it("edits and deletes notes", () => {
+    render(
+      <DashboardProvider>
+        <Harness />
+      </DashboardProvider>,
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: "add note" }));
+    fireEvent.click(screen.getByRole("button", { name: "edit note" }));
+    expect(screen.getByTestId("note-title")).toHaveTextContent("Edited");
+
+    fireEvent.click(screen.getByRole("button", { name: "delete note" }));
+    expect(screen.getByTestId("note-count")).toHaveTextContent("0");
+  });
+
+  it("reorders notes", () => {
+    render(
+      <DashboardProvider>
+        <Harness />
+      </DashboardProvider>,
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: "add note" }));
+    fireEvent.click(screen.getByRole("button", { name: "add note" }));
+    fireEvent.click(screen.getByRole("button", { name: "reorder notes" }));
+
+    expect(screen.getByTestId("note-top-content")).toHaveTextContent("Initial note");
   });
 });

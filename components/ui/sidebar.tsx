@@ -4,6 +4,7 @@ import * as React from "react";
 import { Slot } from "@radix-ui/react-slot";
 import { PanelLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
 
 type SidebarContextValue = {
@@ -141,10 +142,15 @@ export function SidebarInset({ children, className }: { children: React.ReactNod
 export function SidebarTrigger({ className }: { className?: string }) {
   const { toggleSidebar } = useSidebar();
   return (
-    <Button type="button" variant="ghost" size="icon" onClick={toggleSidebar} className={cn("h-8 w-8", className)}>
-      <PanelLeft className="h-4 w-4" />
-      <span className="sr-only">Toggle Sidebar</span>
-    </Button>
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <Button type="button" variant="ghost" size="icon" onClick={toggleSidebar} className={cn("h-8 w-8", className)}>
+          <PanelLeft className="h-4 w-4" />
+          <span className="sr-only">Toggle Sidebar</span>
+        </Button>
+      </TooltipTrigger>
+      <TooltipContent>Toggle sidebar</TooltipContent>
+    </Tooltip>
   );
 }
 

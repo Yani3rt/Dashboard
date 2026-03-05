@@ -49,6 +49,7 @@ import {
   SidebarTrigger,
   useSidebar,
 } from "@/components/ui/sidebar";
+import { TooltipProvider } from "@/components/ui/tooltip";
 import { useDashboard } from "@/lib/state/dashboard-context";
 
 const links = [
@@ -74,9 +75,11 @@ const RECENT_ACTIONS_KEY = "dashboard.palette.recent";
 
 export const AppShell = ({ children }: { children: React.ReactNode }) => {
   return (
-    <SidebarProvider defaultOpen>
-      <ShellLayout>{children}</ShellLayout>
-    </SidebarProvider>
+    <TooltipProvider delayDuration={180}>
+      <SidebarProvider defaultOpen>
+        <ShellLayout>{children}</ShellLayout>
+      </SidebarProvider>
+    </TooltipProvider>
   );
 };
 

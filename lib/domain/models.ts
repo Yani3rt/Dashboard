@@ -35,6 +35,7 @@ export interface Note {
   content: string;
   tags: string[];
   pinned: boolean;
+  order: number;
   createdAt: string;
   updatedAt: string;
 }

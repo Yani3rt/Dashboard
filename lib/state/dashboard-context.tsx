@@ -44,6 +44,9 @@ type DashboardContextValue = {
   addHabit: (name: string) => void;
   toggleHabitForToday: (habitId: string) => void;
   addNote: (content: string, title?: string, tags?: string[]) => void;
+  updateNote: (noteId: string, input: { title?: string; content: string; tags?: string[] }) => void;
+  deleteNote: (noteId: string) => void;
+  reorderNotes: (sourceNoteId: string, targetNoteId: string, scopeNoteIds: string[]) => void;
   pinNote: (noteId: string) => void;
   setTheme: (theme: "dark" | "light") => void;
   exportBackup: () => BackupPayload;
@@ -68,12 +71,20 @@ type Action =
   | { type: "addHabit"; payload: { name: string } }
   | { type: "toggleHabitForToday"; payload: { habitId: string } }
   | { type: "addNote"; payload: { content: string; title?: string; tags: string[] } }
+  | { type: "updateNote"; payload: { noteId: string; title?: string; content: string; tags: string[] } }
+  | { type: "deleteNote"; payload: { noteId: string } }
+  | { type: "reorderNotes"; payload: { sourceNoteId: string; targetNoteId: string; scopeNoteIds: string[] } }
   | { type: "pinNote"; payload: { noteId: string } }
   | { type: "setTheme"; payload: { theme: "dark" | "light" } }
   | { type: "import"; payload: { state: AppState } }
   | { type: "reset" };
 
 const nowIso = (): string => new Date().toISOString();
+
+const getNextNoteOrder = (notes: Note[]): number => {
+  if (notes.length === 0) return 0;
+  return Math.max(...notes.map((note) => note.order)) + 1;
+};
 
 const recalcHabit = (habit: Habit): Habit => {
   const streak = calculateStreak(habit.entries);
@@ -183,11 +194,73 @@ const reducer = (envelope: StateEnvelope, action: Action): StateEnvelope => {
         content: action.payload.content,
         tags: action.payload.tags,
         pinned: false,
+        order: getNextNoteOrder(state.notes),
         createdAt: nowIso(),
         updatedAt: nowIso(),
       };
       return { ...envelope, state: { ...state, notes: [note, ...state.notes] } };
     }
+    case "updateNote":
+      return {
+        ...envelope,
+        state: {
+          ...state,
+          notes: state.notes.map((note) =>
+            note.id === action.payload.noteId
+              ? {
+                  ...note,
+                  title: action.payload.title,
+                  content: action.payload.content,
+                  tags: action.payload.tags,
+                  updatedAt: nowIso(),
+                }
+              : note,
+          ),
+        },
+      };
+    case "reorderNotes": {
+      const source = state.notes.find((note) => note.id === action.payload.sourceNoteId);
+      const target = state.notes.find((note) => note.id === action.payload.targetNoteId);
+      if (!source || !target || source.id === target.id || source.pinned !== target.pinned) {
+        return envelope;
+      }
+
+      const scopedIds = action.payload.scopeNoteIds
+        .filter((id) => state.notes.some((note) => note.id === id))
+        .filter((id) => {
+          const note = state.notes.find((item) => item.id === id);
+          return note?.pinned === source.pinned;
+        });
+
+      const sourceIndex = scopedIds.indexOf(source.id);
+      const targetIndex = scopedIds.indexOf(target.id);
+      if (sourceIndex < 0 || targetIndex < 0 || sourceIndex === targetIndex) {
+        return envelope;
+      }
+
+      const reorderedScope = [...scopedIds];
+      const [moved] = reorderedScope.splice(sourceIndex, 1);
+      reorderedScope.splice(targetIndex, 0, moved);
+      const orderMap = new Map(reorderedScope.map((id, index) => [id, index]));
+
+      return {
+        ...envelope,
+        state: {
+          ...state,
+          notes: state.notes.map((note) =>
+            orderMap.has(note.id) ? { ...note, order: orderMap.get(note.id) ?? note.order } : note,
+          ),
+        },
+      };
+    }
+    case "deleteNote":
+      return {
+        ...envelope,
+        state: {
+          ...state,
+          notes: state.notes.filter((note) => note.id !== action.payload.noteId),
+        },
+      };
     case "pinNote":
       return {
         ...envelope,
@@ -279,6 +352,31 @@ export const DashboardProvider = ({ children }: { children: ReactNode }) => {
     });
   }, []);
 
+  const updateNote = useCallback<DashboardContextValue["updateNote"]>((noteId, input) => {
+    const content = input.content.trim();
+    if (!content) {
+      return;
+    }
+
+    dispatch({
+      type: "updateNote",
+      payload: {
+        noteId,
+        content,
+        title: input.title?.trim() || undefined,
+        tags: (input.tags ?? []).map((tag) => tag.trim()).filter(Boolean),
+      },
+    });
+  }, []);
+
+  const deleteNote = useCallback<DashboardContextValue["deleteNote"]>((noteId) => {
+    dispatch({ type: "deleteNote", payload: { noteId } });
+  }, []);
+
+  const reorderNotes = useCallback<DashboardContextValue["reorderNotes"]>((sourceNoteId, targetNoteId, scopeNoteIds) => {
+    dispatch({ type: "reorderNotes", payload: { sourceNoteId, targetNoteId, scopeNoteIds } });
+  }, []);
+
   const pinNote = useCallback<DashboardContextValue["pinNote"]>((noteId) => {
     dispatch({ type: "pinNote", payload: { noteId } });
   }, []);
@@ -317,6 +415,9 @@ export const DashboardProvider = ({ children }: { children: ReactNode }) => {
     addHabit,
     toggleHabitForToday,
     addNote,
+    updateNote,
+    deleteNote,
+    reorderNotes,
     pinNote,
     setTheme,
     exportBackup,
@@ -332,6 +433,9 @@ export const DashboardProvider = ({ children }: { children: ReactNode }) => {
     addHabit,
     toggleHabitForToday,
     addNote,
+    updateNote,
+    deleteNote,
+    reorderNotes,
     pinNote,
     setTheme,
     exportBackup,
