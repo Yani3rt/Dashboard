@@ -18,9 +18,44 @@ export interface HabitEntry {
   completed: boolean;
 }
 
+export const HABIT_ICON_KEYS = [
+  "sparkles",
+  "dumbbell",
+  "book-open",
+  "moon",
+  "shower-head",
+  "pen-line",
+  "target",
+  "droplets",
+  "salad",
+  "bed-double",
+  "music",
+  "monitor",
+  "bike",
+  "heart-pulse",
+  "brain",
+  "timer",
+] as const;
+
+export type HabitIconKey = (typeof HABIT_ICON_KEYS)[number];
+
+export const HABIT_COLOR_KEYS = [
+  "violet",
+  "green",
+  "yellow",
+  "pink",
+  "cyan",
+  "orange",
+  "teal",
+] as const;
+
+export type HabitColorKey = (typeof HABIT_COLOR_KEYS)[number];
+
 export interface Habit {
   id: string;
   name: string;
+  iconKey: HabitIconKey;
+  colorKey: HabitColorKey;
   targetCadence: "daily";
   entries: HabitEntry[];
   currentStreak: number;
@@ -45,6 +80,7 @@ export interface AppState {
   habits: Habit[];
   notes: Note[];
   theme: "dark" | "light";
+  schoolDays: string[];
 }
 
 export interface BackupPayload {

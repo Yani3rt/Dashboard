@@ -29,6 +29,7 @@ export default function NotesPage() {
   const [search, setSearch] = useState("");
   const [activeTag, setActiveTag] = useState<string>("all");
   const [pinnedOnly, setPinnedOnly] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
   const helpMarkdown = `# Notes Help
 
 ## Quick Actions
@@ -76,8 +77,9 @@ export default function NotesPage() {
 
   const onSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    if (!content.trim()) return;
+    if (!content.trim() || submitting) return;
 
+    setSubmitting(true);
     const tags = tagsInput
       .split(",")
       .map((tag) => tag.trim().toLowerCase())
@@ -88,10 +90,34 @@ export default function NotesPage() {
     setContent("");
     setTagsInput("");
     setCreateOpen(false);
+    setSubmitting(false);
   };
 
   return (
     <div className="stack-page">
+      <section className="page-intro">
+        <div className="page-intro-head">
+          <div>
+            <h1>Notes Workspace</h1>
+            <p>Capture ideas fast, keep pinned context in sight, and turn rough thoughts into clean markdown.</p>
+          </div>
+          <div className="notes-actions">
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button type="button" size="icon" variant="outline" aria-label="Open notes help" onClick={() => setHelpOpen(true)}>
+                  <CircleHelp size={14} />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>Open notes help</TooltipContent>
+            </Tooltip>
+            <Button type="button" className="notes-primary" onClick={() => setCreateOpen(true)}>
+              <Plus size={14} />
+              Add Note
+            </Button>
+          </div>
+        </div>
+      </section>
+
       <section className="card">
         <div className="notes-toolbar">
           <div className="input-with-icon">
@@ -134,18 +160,6 @@ export default function NotesPage() {
               </TooltipTrigger>
               <TooltipContent>{pinnedOnly ? "Showing pinned only" : "Show pinned only"}</TooltipContent>
             </Tooltip>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button type="button" size="icon" variant="outline" aria-label="Open notes help" onClick={() => setHelpOpen(true)}>
-                  <CircleHelp size={14} />
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>Open notes help</TooltipContent>
-            </Tooltip>
-            <Button type="button" onClick={() => setCreateOpen(true)}>
-              <Plus size={14} />
-              Add Note
-            </Button>
           </div>
         </div>
         <div className="mb-3 flex flex-wrap gap-2">
@@ -167,11 +181,19 @@ export default function NotesPage() {
             </DialogDescription>
           </DialogHeader>
           <form className="stack-form note-create-form" onSubmit={onSubmit}>
-            <Input value={title} onChange={(event) => setTitle(event.target.value)} placeholder="Title (optional)" />
+            <Input 
+              value={title} 
+              onChange={(event) => setTitle(event.target.value)} 
+              placeholder="Title (optional)" 
+              maxLength={200}
+              aria-label="Note title"
+            />
             <Input
               value={tagsInput}
               onChange={(event) => setTagsInput(event.target.value)}
               placeholder="tags,comma,separated"
+              maxLength={200}
+              aria-label="Tags"
             />
             <div className="editor-split">
               <Textarea
@@ -179,6 +201,8 @@ export default function NotesPage() {
                 value={content}
                 onChange={(event) => setContent(event.target.value)}
                 placeholder="Write markdown notes..."
+                maxLength={50000}
+                aria-label="Note content"
               />
               <div className="preview-panel">
                 <h4>
@@ -190,7 +214,7 @@ export default function NotesPage() {
               </div>
             </div>
             <div className="note-create-actions">
-              <Button type="submit">Save Note</Button>
+              <Button type="submit" disabled={submitting || !content.trim()}>Save Note</Button>
             </div>
           </form>
         </DialogContent>

@@ -1,12 +1,17 @@
 import * as React from "react";
 import { cn } from "@/lib/utils";
 
-const Input = React.forwardRef<HTMLInputElement, React.ComponentProps<"input">>(({ className, type, ...props }, ref) => {
+export interface InputProps extends React.ComponentProps<"input"> {
+  maxLength?: number;
+}
+
+const Input = React.forwardRef<HTMLInputElement, InputProps>(({ className, type, maxLength, ...props }, ref) => {
   return (
     <input
       type={type}
+      maxLength={maxLength}
       className={cn(
-        "flex h-10 w-full rounded-md border border-input bg-background/60 px-3 py-2 text-sm text-foreground shadow-sm outline-none transition-colors placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-2 focus-visible:ring-ring/50 disabled:cursor-not-allowed disabled:opacity-50",
+        "flex h-11 w-full rounded-md border border-input bg-[hsl(var(--control))] px-4 py-2 text-sm text-foreground outline-none transition-colors placeholder:text-muted-foreground focus-visible:border-ring focus-visible:bg-[hsl(var(--control-strong))] focus-visible:ring-2 focus-visible:ring-ring/20 disabled:cursor-not-allowed disabled:opacity-50",
         className,
       )}
       ref={ref}

@@ -89,13 +89,13 @@ export function Sidebar({
           <button
             type="button"
             aria-label="Close sidebar"
-            className="fixed inset-0 z-40 bg-black/50"
+            className="fixed inset-0 z-40 bg-black/45"
             onClick={() => setOpen(false)}
           />
         ) : null}
         <aside
           className={cn(
-            "fixed left-0 top-0 z-50 h-svh w-64 border-r border-sidebar-border bg-sidebar text-sidebar-foreground shadow-lg transition-transform duration-200",
+            "fixed left-0 top-0 z-50 h-svh w-72 border-r border-sidebar-border bg-sidebar text-sidebar-foreground transition-transform duration-200",
             open ? "translate-x-0" : "-translate-x-full",
             className,
           )}
@@ -115,15 +115,15 @@ export function Sidebar({
     >
       <div
         className={cn(
-          "relative h-svh w-64 bg-transparent transition-[width] duration-200",
-          state === "collapsed" && "w-14",
+          "relative h-svh w-72 bg-transparent transition-[width] duration-200",
+          state === "collapsed" && "w-[5.25rem]",
         )}
       >
         <div
           className={cn(
             "fixed inset-y-0 z-10 flex h-svh border-r border-sidebar-border bg-sidebar transition-[width,left,right] duration-200",
             side === "left" ? "left-0" : "right-0",
-            state === "expanded" ? "w-64" : "w-14",
+            state === "expanded" ? "w-72" : "w-[5.25rem]",
           )}
         >
           <div data-sidebar="sidebar" className="flex h-full w-full flex-col">
@@ -144,7 +144,7 @@ export function SidebarTrigger({ className }: { className?: string }) {
   return (
     <Tooltip>
       <TooltipTrigger asChild>
-        <Button type="button" variant="ghost" size="icon" onClick={toggleSidebar} className={cn("h-8 w-8", className)}>
+        <Button type="button" variant="outline" size="icon" onClick={toggleSidebar} className={cn("h-11 w-11 border-border bg-control", className)}>
           <PanelLeft className="h-4 w-4" />
           <span className="sr-only">Toggle Sidebar</span>
         </Button>
@@ -155,24 +155,24 @@ export function SidebarTrigger({ className }: { className?: string }) {
 }
 
 export function SidebarHeader({ children, className }: { children: React.ReactNode; className?: string }) {
-  return <div className={cn("flex flex-col gap-2 p-2", className)}>{children}</div>;
+  return <div className={cn("flex flex-col gap-3 p-3 pb-2", className)}>{children}</div>;
 }
 
 export function SidebarFooter({ children, className }: { children: React.ReactNode; className?: string }) {
-  return <div className={cn("mt-auto flex flex-col gap-2 p-2", className)}>{children}</div>;
+  return <div className={cn("mt-auto flex flex-col gap-3 p-3 pt-2", className)}>{children}</div>;
 }
 
 export function SidebarContent({ children, className }: { children: React.ReactNode; className?: string }) {
-  return <div className={cn("flex min-h-0 flex-1 flex-col gap-2 overflow-auto px-2", className)}>{children}</div>;
+  return <div className={cn("flex min-h-0 flex-1 flex-col gap-3 overflow-auto px-3", className)}>{children}</div>;
 }
 
 export function SidebarGroup({ children, className }: { children: React.ReactNode; className?: string }) {
-  return <section className={cn("relative flex w-full min-w-0 flex-col p-1", className)}>{children}</section>;
+  return <section className={cn("relative flex w-full min-w-0 flex-col gap-2 rounded-xl border border-sidebar-border bg-sidebar p-2", className)}>{children}</section>;
 }
 
 export function SidebarGroupLabel({ children, className }: { children: React.ReactNode; className?: string }) {
   return (
-    <p className={cn("px-2 py-1 text-xs font-medium text-sidebar-foreground/70 group-data-[collapsible=icon]:hidden", className)}>
+    <p className={cn("ui-meta-label px-2 py-1 text-sidebar-foreground/62 group-data-[collapsible=icon]:hidden", className)}>
       {children}
     </p>
   );
@@ -208,7 +208,7 @@ export function SidebarMenuButton({
       data-slot="sidebar-menu-button"
       data-active={isActive}
       className={cn(
-        "peer/menu-button flex w-full items-center gap-2 overflow-hidden rounded-md p-2 text-left text-sm outline-none ring-sidebar-ring transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground focus-visible:ring-2 data-[active=true]:bg-sidebar-accent data-[active=true]:font-medium data-[active=true]:text-sidebar-accent-foreground disabled:pointer-events-none disabled:opacity-50 group-data-[collapsible=icon]:h-8 group-data-[collapsible=icon]:w-8 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:p-2 group-data-[collapsible=icon]:[&>span]:hidden group-data-[collapsible=icon]:[&>svg+span]:hidden",
+        "peer/menu-button flex w-full items-center gap-3 overflow-hidden rounded-xl border border-transparent px-3 py-3 text-left text-sm font-medium outline-none ring-sidebar-ring transition-colors duration-200 hover:border-sidebar-border hover:bg-sidebar-accent hover:text-sidebar-accent-foreground focus-visible:ring-2 data-[active=true]:border-sidebar-border data-[active=true]:bg-sidebar-accent data-[active=true]:font-semibold data-[active=true]:text-sidebar-accent-foreground disabled:pointer-events-none disabled:opacity-50 group-data-[collapsible=icon]:h-12 group-data-[collapsible=icon]:w-12 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:rounded-xl group-data-[collapsible=icon]:px-0 group-data-[collapsible=icon]:py-0 group-data-[collapsible=icon]:[&>span]:hidden group-data-[collapsible=icon]:[&>svg+span]:hidden",
         className,
       )}
       {...props}

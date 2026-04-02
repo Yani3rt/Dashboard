@@ -1,14 +1,16 @@
 import { DataProvider } from "@/lib/data/provider";
-import { AppState } from "@/lib/domain/models";
+import { AppState, Habit } from "@/lib/domain/models";
+import { normalizeHabitMeta } from "@/lib/domain/habit-meta";
 
 const STORAGE_KEY = "dashboard.v1.state";
-export const SCHEMA_VERSION = 1;
+export const SCHEMA_VERSION = 2;
 
 const defaultState: AppState = {
   tasks: [],
   habits: [],
   notes: [],
   theme: "dark",
+  schoolDays: [],
 };
 
 interface PersistedState {
@@ -16,8 +18,17 @@ interface PersistedState {
   state: AppState;
 }
 
+const normalizeHabit = (habit: Habit): Habit => {
+  const meta = normalizeHabitMeta({ id: habit.id, iconKey: habit.iconKey, colorKey: habit.colorKey });
+  return {
+    ...habit,
+    ...meta,
+  };
+};
+
 const normalizeState = (raw: AppState): AppState => ({
   ...raw,
+  habits: raw.habits.map((habit) => normalizeHabit(habit as Habit)),
   notes: raw.notes.map((note, index) => ({
     ...note,
     tags: Array.isArray(note.tags) ? note.tags : [],
@@ -32,7 +43,7 @@ const parseState = (raw: string | null): AppState => {
 
   try {
     const parsed = JSON.parse(raw) as PersistedState;
-    if (parsed.version !== SCHEMA_VERSION || !parsed.state) {
+    if (!parsed.state || typeof parsed.version !== "number" || parsed.version > SCHEMA_VERSION) {
       return defaultState;
     }
     return normalizeState({

@@ -14,12 +14,12 @@ const DialogOverlay = React.forwardRef<
   React.ElementRef<typeof DialogPrimitive.Overlay>,
   React.ComponentPropsWithoutRef<typeof DialogPrimitive.Overlay>
 >(({ className, ...props }, ref) => (
-  <DialogPrimitive.Overlay
-    ref={ref}
-    className={cn(
-      "fixed inset-0 z-50 bg-black/70 data-[state=open]:opacity-100 data-[state=closed]:opacity-0 data-[state=open]:transition-opacity data-[state=closed]:transition-opacity data-[state=open]:duration-200 data-[state=closed]:duration-150",
-      className,
-    )}
+    <DialogPrimitive.Overlay
+      ref={ref}
+      className={cn(
+        "fixed inset-0 z-50 bg-black/75 data-[state=open]:opacity-100 data-[state=closed]:opacity-0 data-[state=open]:transition-opacity data-[state=closed]:transition-opacity data-[state=open]:duration-200 data-[state=closed]:duration-150",
+        className,
+      )}
     {...props}
   />
 ));
@@ -34,7 +34,7 @@ const DialogContent = React.forwardRef<
     <DialogPrimitive.Content
       ref={ref}
       className={cn(
-        "fixed left-1/2 top-1/2 z-50 grid w-full max-w-2xl -translate-x-1/2 -translate-y-1/2 gap-4 rounded-xl border border-border/80 bg-card p-4 text-card-foreground shadow-[0_24px_54px_rgba(0,0,0,0.45)] data-[state=open]:opacity-100 data-[state=closed]:opacity-0 data-[state=open]:scale-100 data-[state=closed]:scale-95 data-[state=open]:transition-[opacity,transform] data-[state=closed]:transition-[opacity,transform] data-[state=open]:duration-200 data-[state=closed]:duration-150",
+        "fixed left-1/2 top-1/2 z-50 grid w-full max-w-2xl -translate-x-1/2 -translate-y-1/2 gap-4 rounded-xl border border-border bg-card p-5 text-card-foreground data-[state=open]:opacity-100 data-[state=closed]:opacity-0 data-[state=open]:scale-100 data-[state=closed]:scale-95 data-[state=open]:transition-[opacity,transform] data-[state=closed]:transition-[opacity,transform] data-[state=open]:duration-200 data-[state=closed]:duration-150",
         className,
       )}
       {...props}

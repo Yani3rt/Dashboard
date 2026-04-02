@@ -1,6 +1,7 @@
 import React from "react";
 import { fireEvent, render, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
+import { pickHabitColorBySeed, pickHabitIconBySeed } from "@/lib/domain/habit-meta";
 import { DashboardProvider, useDashboard } from "@/lib/state/dashboard-context";
 
 const Harness = () => {
@@ -34,7 +35,16 @@ const Harness = () => {
       >
         complete task
       </button>
-      <button onClick={() => addHabit("Workout")} type="button">
+      <button
+        onClick={() =>
+          addHabit({
+            name: "Workout",
+            iconKey: pickHabitIconBySeed("Workout"),
+            colorKey: pickHabitColorBySeed("Workout"),
+          })
+        }
+        type="button"
+      >
         add habit
       </button>
       <button onClick={() => addNote("Initial note", "Draft", ["inbox"])} type="button">
@@ -163,6 +173,43 @@ describe("dashboard provider flows", () => {
     fireEvent.click(screen.getByRole("button", { name: "invalid import" }));
 
     expect(window.localStorage.getItem("invalid-import")).toBe("error");
+  });
+
+  it("imports legacy backup and normalizes habit metadata", () => {
+    render(
+      <DashboardProvider>
+        <Harness />
+      </DashboardProvider>,
+    );
+
+    const legacy = {
+      version: 1,
+      exportedAt: "2026-03-10T00:00:00.000Z",
+      state: {
+        tasks: [],
+        habits: [
+          {
+            id: "legacy-habit",
+            name: "Read",
+            targetCadence: "daily",
+            entries: [],
+            currentStreak: 0,
+            bestStreak: 0,
+            createdAt: "2026-03-10T00:00:00.000Z",
+            updatedAt: "2026-03-10T00:00:00.000Z",
+          },
+        ],
+        notes: [],
+        theme: "dark",
+        schoolDays: [],
+      },
+    };
+
+    window.localStorage.setItem("test-backup", JSON.stringify(legacy));
+    fireEvent.click(screen.getByRole("button", { name: "import" }));
+    fireEvent.click(screen.getByRole("button", { name: "toggle habit" }));
+
+    expect(screen.getByTestId("habit-streak")).toHaveTextContent("1");
   });
 
   it("edits and deletes notes", () => {

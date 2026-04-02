@@ -35,13 +35,13 @@ const DropdownMenuSubContent = React.forwardRef<
   React.ElementRef<typeof DropdownMenuPrimitive.SubContent>,
   React.ComponentPropsWithoutRef<typeof DropdownMenuPrimitive.SubContent>
 >(({ className, ...props }, ref) => (
-  <DropdownMenuPrimitive.SubContent
-    ref={ref}
-    className={cn(
-      "z-50 min-w-[8rem] overflow-hidden rounded-md border border-border bg-popover p-1 text-popover-foreground shadow-lg outline-none data-[state=open]:opacity-100 data-[state=closed]:opacity-0 data-[state=open]:scale-100 data-[state=closed]:scale-95 data-[state=open]:transition-[opacity,transform] data-[state=closed]:transition-[opacity,transform] data-[state=open]:duration-150 data-[state=closed]:duration-100",
+    <DropdownMenuPrimitive.SubContent
+      ref={ref}
+      className={cn(
+      "z-50 min-w-[8rem] overflow-hidden rounded-md border border-border bg-popover p-1 text-popover-foreground outline-none data-[state=open]:opacity-100 data-[state=closed]:opacity-0 data-[state=open]:scale-100 data-[state=closed]:scale-95 data-[state=open]:transition-[opacity,transform] data-[state=closed]:transition-[opacity,transform] data-[state=open]:duration-150 data-[state=closed]:duration-100",
       className,
-    )}
-    {...props}
+      )}
+      {...props}
   />
 ));
 DropdownMenuSubContent.displayName = DropdownMenuPrimitive.SubContent.displayName;
@@ -55,7 +55,7 @@ const DropdownMenuContent = React.forwardRef<
       ref={ref}
       sideOffset={sideOffset}
       className={cn(
-        "z-50 min-w-[8rem] overflow-hidden rounded-md border border-border bg-popover p-1 text-popover-foreground shadow-md outline-none data-[state=open]:opacity-100 data-[state=closed]:opacity-0 data-[state=open]:scale-100 data-[state=closed]:scale-95 data-[state=open]:transition-[opacity,transform] data-[state=closed]:transition-[opacity,transform] data-[state=open]:duration-150 data-[state=closed]:duration-100 data-[side=bottom]:translate-y-1 data-[side=top]:-translate-y-1 data-[state=open]:translate-y-0",
+        "z-50 min-w-[8rem] overflow-hidden rounded-md border border-border bg-popover p-1 text-popover-foreground outline-none data-[state=open]:opacity-100 data-[state=closed]:opacity-0 data-[state=open]:scale-100 data-[state=closed]:scale-95 data-[state=open]:transition-[opacity,transform] data-[state=closed]:transition-[opacity,transform] data-[state=open]:duration-150 data-[state=closed]:duration-100 data-[side=bottom]:translate-y-1 data-[side=top]:-translate-y-1 data-[state=open]:translate-y-0",
         className,
       )}
       {...props}
@@ -137,5 +137,5 @@ export {
 };
 
 function DropdownMenuShortcut({ className, ...props }: React.HTMLAttributes<HTMLSpanElement>) {
-  return <span className={cn("ml-auto text-xs tracking-widest opacity-60", className)} {...props} />;
+  return <span className={cn("ui-meta-label ml-auto opacity-60", className)} {...props} />;
 }

@@ -1,6 +1,7 @@
 "use client";
 
 import { ChangeEvent, useState } from "react";
+import { Download } from "lucide-react";
 import { BackupPayload } from "@/lib/domain/models";
 import { useDashboard } from "@/lib/state/dashboard-context";
 import { Card } from "@/components/ui/card";
@@ -49,8 +50,20 @@ export default function SettingsPage() {
 
   return (
     <div className="stack-page">
+      <section className="page-intro">
+        <div className="page-intro-head">
+          <div>
+            <h1>Settings</h1>
+            <p>Manage local mode preferences and keep a backup snapshot of your workspace.</p>
+          </div>
+          <Button type="button" onClick={onExport}>
+            <Download size={14} />
+            Export Backup
+          </Button>
+        </div>
+      </section>
+
       <Card className="card">
-        <h2>Settings</h2>
         <div className="stack-form">
           <label htmlFor="theme">Theme</label>
           <Select value={state.theme} onValueChange={(value: "dark" | "light") => setTheme(value)}>
@@ -62,9 +75,6 @@ export default function SettingsPage() {
               <SelectItem value="light">Light</SelectItem>
             </SelectContent>
           </Select>
-          <Button type="button" onClick={onExport}>
-            Export Backup
-          </Button>
           <Input type="file" accept="application/json" onChange={onImport} />
           <Button type="button" variant="outline" onClick={resetAll}>
             Reset Local Data

@@ -1,6 +1,6 @@
 "use client";
 
-import { FormEvent, useMemo, useState } from "react";
+import { FormEvent, useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -11,28 +11,28 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { TaskList, taskViews } from "@/components/task-list";
+import { DatePicker } from "@/components/ui/date-picker";
+import { format } from "date-fns";
+import { KanbanBoard } from "@/components/kanban-board";
 import { useDashboard } from "@/lib/state/dashboard-context";
 
 export default function TasksPage() {
   const { state, addTask } = useDashboard();
   const [title, setTitle] = useState("");
   const [priority, setPriority] = useState<"low" | "medium" | "high">("medium");
-  const [dueDate, setDueDate] = useState("");
+  const [dueDate, setDueDate] = useState<Date>();
   const [tags, setTags] = useState("");
-
-  const today = useMemo(() => taskViews.today(state.tasks), [state.tasks]);
-  const upcoming = useMemo(() => taskViews.upcoming(state.tasks), [state.tasks]);
-  const completed = useMemo(() => taskViews.completed(state.tasks), [state.tasks]);
+  const [submitting, setSubmitting] = useState(false);
 
   const onSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    if (!title.trim()) return;
-
+    if (!title.trim() || submitting) return;
+    
+    setSubmitting(true);
     addTask({
       title: title.trim(),
       priority,
-      dueDate: dueDate || undefined,
+      dueDate: dueDate ? format(dueDate, "yyyy-MM-dd") : undefined,
       tags: tags
         .split(",")
         .map((tag) => tag.trim())
@@ -41,16 +41,32 @@ export default function TasksPage() {
 
     setTitle("");
     setPriority("medium");
-    setDueDate("");
+    setDueDate(undefined);
     setTags("");
+    setSubmitting(false);
   };
 
   return (
     <div className="stack-page">
+      <section className="page-intro">
+        <div className="page-intro-head">
+          <div>
+            <h1>Task Board</h1>
+            <p>Plan what matters, then move work forward with drag-and-drop execution.</p>
+          </div>
+        </div>
+      </section>
+
       <Card className="card">
-        <h2>Task Management</h2>
         <form onSubmit={onSubmit} className="grid-form">
-          <Input value={title} onChange={(event) => setTitle(event.target.value)} placeholder="Task title" />
+          <Input 
+            value={title} 
+            onChange={(event) => setTitle(event.target.value)} 
+            placeholder="Task title" 
+            maxLength={200}
+            required
+            aria-label="Task title"
+          />
           <Select value={priority} onValueChange={(value: "low" | "medium" | "high") => setPriority(value)}>
             <SelectTrigger>
               <SelectValue placeholder="Priority" />
@@ -61,26 +77,19 @@ export default function TasksPage() {
               <SelectItem value="low">Low</SelectItem>
             </SelectContent>
           </Select>
-          <Input type="date" value={dueDate} onChange={(event) => setDueDate(event.target.value)} />
-          <Input value={tags} onChange={(event) => setTags(event.target.value)} placeholder="tags,comma,separated" />
-          <Button type="submit">Create Task</Button>
+          <DatePicker date={dueDate} setDate={setDueDate} />
+          <Input 
+            value={tags} 
+            onChange={(event) => setTags(event.target.value)} 
+            placeholder="tags,comma,separated" 
+            maxLength={200}
+            aria-label="Tags"
+          />
+          <Button type="submit" disabled={submitting || !title.trim()}>Create Task</Button>
         </form>
       </Card>
 
-      <Card className="card">
-        <h3>Today</h3>
-        <TaskList tasks={today} />
-      </Card>
-
-      <Card className="card">
-        <h3>Upcoming</h3>
-        <TaskList tasks={upcoming} />
-      </Card>
-
-      <Card className="card">
-        <h3>Completed</h3>
-        <TaskList tasks={completed} />
-      </Card>
+      <KanbanBoard tasks={state.tasks} />
     </div>
   );
 }

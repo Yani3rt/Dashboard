@@ -5,12 +5,13 @@ import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useMemo, useState, type KeyboardEvent as ReactKeyboardEvent } from "react";
 import type { LucideIcon } from "lucide-react";
 import {
+  Activity,
+  Clock3,
   CheckSquare,
   ChevronsUpDown,
   Command,
   Compass,
   FolderKanban,
-  Inbox,
   LayoutDashboard,
   Moon,
   NotebookPen,
@@ -19,13 +20,16 @@ import {
   Search,
   Settings,
   Sparkles,
+  CalendarDays,
   Sun,
+  Waves,
   UserCircle2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { AuthButton } from "@/components/AuthButton";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -50,6 +54,7 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { pickHabitColorBySeed, pickHabitIconBySeed } from "@/lib/domain/habit-meta";
 import { useDashboard } from "@/lib/state/dashboard-context";
 
 const links = [
@@ -57,6 +62,7 @@ const links = [
   { href: "/tasks", label: "Tasks", icon: FolderKanban },
   { href: "/habits", label: "Habits", icon: Repeat },
   { href: "/notes", label: "Notes", icon: NotebookPen },
+  { href: "/school", label: "Calendar", icon: CalendarDays },
   { href: "/settings", label: "Settings", icon: Settings },
 ];
 
@@ -73,6 +79,23 @@ type PaletteAction = {
 
 const RECENT_ACTIONS_KEY = "dashboard.palette.recent";
 
+const getOrdinalSuffix = (day: number): string => {
+  const modHundred = day % 100;
+  if (modHundred >= 11 && modHundred <= 13) return "th";
+  const modTen = day % 10;
+  if (modTen === 1) return "st";
+  if (modTen === 2) return "nd";
+  if (modTen === 3) return "rd";
+  return "th";
+};
+
+const formatTopbarDate = (date: Date): string => {
+  const weekday = new Intl.DateTimeFormat("en-US", { weekday: "long" }).format(date);
+  const month = new Intl.DateTimeFormat("en-US", { month: "long" }).format(date);
+  const day = date.getDate();
+  return `${weekday}, ${day}${getOrdinalSuffix(day)} ${month}`;
+};
+
 export const AppShell = ({ children }: { children: React.ReactNode }) => {
   return (
     <TooltipProvider delayDuration={180}>
@@ -88,29 +111,30 @@ const ShellLayout = ({ children }: { children: React.ReactNode }) => {
   const router = useRouter();
   const { open, isMobile } = useSidebar();
   const showLabels = open || isMobile;
+  const activeLink = links.find((link) => link.href === pathname);
+  const currentTime = new Date().toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
+  const currentDate = formatTopbarDate(new Date());
 
   const [paletteOpen, setPaletteOpen] = useState(false);
   const [captureOpen, setCaptureOpen] = useState(false);
   const [query, setQuery] = useState("");
   const [paletteMode, setPaletteMode] = useState<PaletteMode>("actions");
   const [selectedIndex, setSelectedIndex] = useState(0);
-  const [recentActionIds, setRecentActionIds] = useState<string[]>([]);
+  const [recentActionIds, setRecentActionIds] = useState<string[]>(() => {
+    if (typeof window === "undefined") return [];
+    try {
+      const raw = window.localStorage.getItem(RECENT_ACTIONS_KEY);
+      if (!raw) return [];
+      const parsed = JSON.parse(raw) as string[];
+      return Array.isArray(parsed) ? parsed : [];
+    } catch {
+      return [];
+    }
+  });
   const [quickTask, setQuickTask] = useState("");
   const [quickNote, setQuickNote] = useState("");
   const [quickHabit, setQuickHabit] = useState("");
   const { state, addTask, addNote, addHabit, toggleHabitForToday, setTheme } = useDashboard();
-
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-    try {
-      const raw = window.localStorage.getItem(RECENT_ACTIONS_KEY);
-      if (!raw) return;
-      const parsed = JSON.parse(raw) as string[];
-      if (Array.isArray(parsed)) setRecentActionIds(parsed);
-    } catch {
-      setRecentActionIds([]);
-    }
-  }, []);
 
   useEffect(() => {
     const onKey = (event: KeyboardEvent) => {
@@ -179,10 +203,6 @@ const ShellLayout = ({ children }: { children: React.ReactNode }) => {
       .filter((entry) => entry.items.length > 0);
   }, [options]);
 
-  useEffect(() => {
-    setSelectedIndex(0);
-  }, [query, paletteMode, options.length]);
-
   const closePalette = () => {
     setPaletteOpen(false);
     setPaletteMode("actions");
@@ -237,7 +257,16 @@ const ShellLayout = ({ children }: { children: React.ReactNode }) => {
           closePalette();
         }}>
           <label htmlFor="palette-task">Task title</label>
-          <Input id="palette-task" autoFocus value={quickTask} onChange={(event) => setQuickTask(event.target.value)} placeholder="Create a task instantly" />
+          <Input 
+            id="palette-task" 
+            autoFocus 
+            value={quickTask} 
+            onChange={(event) => setQuickTask(event.target.value)} 
+            placeholder="Create a task instantly" 
+            maxLength={200}
+            aria-describedby="palette-task-hint"
+          />
+          <small id="palette-task-hint" className="ui-meta-label text-muted-foreground">Maximum 200 characters</small>
           <div className="modal-actions">
             <Button type="submit">Create task</Button>
             <Button type="button" variant="ghost" onClick={() => setPaletteMode("actions")}>Back</Button>
@@ -256,7 +285,15 @@ const ShellLayout = ({ children }: { children: React.ReactNode }) => {
           closePalette();
         }}>
           <label htmlFor="palette-note">Note content</label>
-          <Textarea id="palette-note" autoFocus value={quickNote} onChange={(event) => setQuickNote(event.target.value)} rows={5} placeholder="Capture a note instantly" />
+          <Textarea 
+            id="palette-note" 
+            autoFocus 
+            value={quickNote} 
+            onChange={(event) => setQuickNote(event.target.value)} 
+            rows={5} 
+            placeholder="Capture a note instantly" 
+            maxLength={50000}
+          />
           <div className="modal-actions">
             <Button type="submit">Create note</Button>
             <Button type="button" variant="ghost" onClick={() => setPaletteMode("actions")}>Back</Button>
@@ -270,12 +307,24 @@ const ShellLayout = ({ children }: { children: React.ReactNode }) => {
         <form className="stack-form" onSubmit={(event) => {
           event.preventDefault();
           if (!quickHabit.trim()) return;
-          addHabit(quickHabit.trim());
+          const name = quickHabit.trim();
+          addHabit({
+            name,
+            iconKey: pickHabitIconBySeed(name),
+            colorKey: pickHabitColorBySeed(name),
+          });
           setQuickHabit("");
           closePalette();
         }}>
           <label htmlFor="palette-habit">Habit name</label>
-          <Input id="palette-habit" autoFocus value={quickHabit} onChange={(event) => setQuickHabit(event.target.value)} placeholder="Create a habit instantly" />
+          <Input 
+            id="palette-habit" 
+            autoFocus 
+            value={quickHabit} 
+            onChange={(event) => setQuickHabit(event.target.value)} 
+            placeholder="Create a habit instantly" 
+            maxLength={100}
+          />
           <div className="modal-actions">
             <Button type="submit">Create habit</Button>
             <Button type="button" variant="ghost" onClick={() => setPaletteMode("actions")}>Back</Button>
@@ -288,7 +337,16 @@ const ShellLayout = ({ children }: { children: React.ReactNode }) => {
 
     return (
       <>
-        <Input autoFocus value={query} onChange={(event) => setQuery(event.target.value)} onKeyDown={onActionInputKeyDown} placeholder="Search actions, routes, tasks, notes, habits" />
+        <Input
+          autoFocus
+          value={query}
+          onChange={(event) => {
+            setQuery(event.target.value);
+            setSelectedIndex(0);
+          }}
+          onKeyDown={onActionInputKeyDown}
+          placeholder="Search actions, routes, tasks, notes, habits"
+        />
         <div className="palette-list">
           {groupedOptions.map((section) => (
             <section key={section.group} className="palette-section">
@@ -316,19 +374,19 @@ const ShellLayout = ({ children }: { children: React.ReactNode }) => {
   };
 
   return (
-    <>
-      <Sidebar>
+      <>
+      <Sidebar className="shell-sidebar">
         <SidebarHeader>
           <SidebarMenu>
             <SidebarMenuItem>
-              <SidebarMenuButton className={showLabels ? "h-12 justify-start" : "h-12 justify-center"}>
-                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
+              <SidebarMenuButton className={showLabels ? "shell-brand h-auto justify-start" : "shell-brand h-12 justify-center"}>
+                <div className="shell-brand-mark">
                   <Sparkles className="h-4 w-4" />
                 </div>
                 {showLabels ? (
-                  <div className="grid flex-1 text-left text-sm leading-tight">
-                    <span className="truncate font-semibold">Night Shift</span>
-                    <span className="truncate text-xs text-sidebar-foreground/70">Personal Dashboard</span>
+                  <div className="shell-brand-copy">
+                    <span className="truncate font-semibold">Night Shift OS</span>
+                    <span className="ui-meta-label truncate text-sidebar-foreground/70">Dashboard Console</span>
                   </div>
                 ) : null}
                 {showLabels ? <ChevronsUpDown className="ml-auto h-4 w-4 text-sidebar-foreground/60" /> : null}
@@ -339,7 +397,7 @@ const ShellLayout = ({ children }: { children: React.ReactNode }) => {
 
         <SidebarContent>
           <SidebarGroup>
-            {showLabels ? <SidebarGroupLabel>Platform</SidebarGroupLabel> : null}
+            {showLabels ? <SidebarGroupLabel>Destinations</SidebarGroupLabel> : null}
             <SidebarGroupContent>
               <SidebarMenu>
                 {links.map((link) => (
@@ -355,37 +413,17 @@ const ShellLayout = ({ children }: { children: React.ReactNode }) => {
               </SidebarMenu>
             </SidebarGroupContent>
           </SidebarGroup>
-
-          <SidebarGroup>
-            {showLabels ? <SidebarGroupLabel>Actions</SidebarGroupLabel> : null}
-            <SidebarGroupContent>
-              <SidebarMenu>
-                <SidebarMenuItem>
-                  <SidebarMenuButton className={showLabels ? "justify-start" : "justify-center"} onClick={() => setPaletteOpen(true)}>
-                    <Command className="h-4 w-4" />
-                    {showLabels ? <span>Command Palette</span> : null}
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-                <SidebarMenuItem>
-                  <SidebarMenuButton className={showLabels ? "justify-start" : "justify-center"} onClick={() => setCaptureOpen(true)}>
-                    <Inbox className="h-4 w-4" />
-                    {showLabels ? <span>Quick Capture</span> : null}
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              </SidebarMenu>
-            </SidebarGroupContent>
-          </SidebarGroup>
         </SidebarContent>
 
         <SidebarFooter>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <SidebarMenuButton className={showLabels ? "h-11 justify-start" : "h-11 justify-center"}>
+              <SidebarMenuButton className={showLabels ? "shell-profile h-auto justify-start" : "shell-profile h-12 justify-center"}>
                 <UserCircle2 className="h-5 w-5" />
                 {showLabels ? (
                   <div className="grid flex-1 text-left text-sm leading-tight">
                     <span className="truncate font-medium">You</span>
-                    <span className="truncate text-xs text-sidebar-foreground/70">Local profile</span>
+                    <span className="ui-meta-label truncate text-sidebar-foreground/70">Local session online</span>
                   </div>
                 ) : null}
                 {showLabels ? <ChevronsUpDown className="ml-auto h-4 w-4 text-sidebar-foreground/60" /> : null}
@@ -408,11 +446,41 @@ const ShellLayout = ({ children }: { children: React.ReactNode }) => {
       </Sidebar>
 
       <SidebarInset>
-        <header className="sticky top-0 z-20 flex h-14 items-center gap-3 border-b border-border/60 bg-background/70 px-4 backdrop-blur supports-[backdrop-filter]:bg-background/55">
-          <SidebarTrigger />
-          <div className="text-sm font-medium text-muted-foreground">Command center</div>
-        </header>
-        <main className="content">{children}</main>
+        <div className="shell-main">
+          <header className="shell-topbar">
+            <div className="flex items-center gap-3">
+              <SidebarTrigger />
+              <div className="shell-topbar-copy">
+                <p className="shell-topbar-label">{currentDate}</p>
+                <div className="shell-topbar-title-row">
+                  <h1 className="shell-topbar-title">{activeLink?.label ?? "Dashboard"}</h1>
+                  <span className="shell-status shell-status-live">
+                    <Activity className="h-3.5 w-3.5" />
+                    Live local
+                  </span>
+                </div>
+              </div>
+            </div>
+            <div className="shell-topbar-actions">
+              <button type="button" className="shell-pill" onClick={() => setPaletteOpen(true)}>
+                <Command className="h-3.5 w-3.5" />
+                <span>Explore</span>
+                <span className="shell-keycap">⌘K</span>
+              </button>
+              <button type="button" className="shell-pill" onClick={() => setCaptureOpen(true)}>
+                <Waves className="h-3.5 w-3.5" />
+                <span>Quick Capture</span>
+              </button>
+              <div className="shell-status">
+                <Clock3 className="h-3.5 w-3.5" />
+                <span>{currentTime}</span>
+              </div>
+              <AuthButton />
+            </div>
+          </header>
+
+          <main className="content shell-content">{children}</main>
+        </div>
       </SidebarInset>
 
       <Dialog open={paletteOpen} onOpenChange={setPaletteOpen}>
@@ -424,10 +492,22 @@ const ShellLayout = ({ children }: { children: React.ReactNode }) => {
             </DialogDescription>
           </DialogHeader>
           <div className="palette-shortcuts">
-            <Button type="button" variant="ghost" onClick={() => setPaletteMode("actions")}><Search size={14} />Actions</Button>
-            <Button type="button" variant="ghost" onClick={() => setPaletteMode("create-task")}><PlusSquare size={14} />New Task</Button>
-            <Button type="button" variant="ghost" onClick={() => setPaletteMode("create-note")}><NotebookPen size={14} />New Note</Button>
-            <Button type="button" variant="ghost" onClick={() => setPaletteMode("create-habit")}><Repeat size={14} />New Habit</Button>
+            <Button type="button" variant="ghost" onClick={() => {
+              setPaletteMode("actions");
+              setSelectedIndex(0);
+            }}><Search size={14} />Actions</Button>
+            <Button type="button" variant="ghost" onClick={() => {
+              setPaletteMode("create-task");
+              setSelectedIndex(0);
+            }}><PlusSquare size={14} />New Task</Button>
+            <Button type="button" variant="ghost" onClick={() => {
+              setPaletteMode("create-note");
+              setSelectedIndex(0);
+            }}><NotebookPen size={14} />New Note</Button>
+            <Button type="button" variant="ghost" onClick={() => {
+              setPaletteMode("create-habit");
+              setSelectedIndex(0);
+            }}><Repeat size={14} />New Habit</Button>
           </div>
           {renderPaletteContent()}
         </DialogContent>
@@ -440,7 +520,26 @@ const ShellLayout = ({ children }: { children: React.ReactNode }) => {
 
 const QuickCapture = ({ open, onOpenChange }: { open: boolean; onOpenChange: (open: boolean) => void }) => {
   const [text, setText] = useState("");
+  const [submitting, setSubmitting] = useState(false);
   const { addTask, addNote } = useDashboard();
+
+  const handleSaveTask = () => {
+    if (!text.trim() || submitting) return;
+    setSubmitting(true);
+    addTask({ title: text.trim() });
+    setText("");
+    setSubmitting(false);
+    onOpenChange(false);
+  };
+
+  const handleSaveNote = () => {
+    if (!text.trim() || submitting) return;
+    setSubmitting(true);
+    addNote(text.trim());
+    setText("");
+    setSubmitting(false);
+    onOpenChange(false);
+  };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -451,21 +550,29 @@ const QuickCapture = ({ open, onOpenChange }: { open: boolean; onOpenChange: (op
             Capture a thought quickly and save it as either a task or a note.
           </DialogDescription>
         </DialogHeader>
-        <Textarea value={text} onChange={(event) => setText(event.target.value)} rows={5} placeholder="Capture thought, task, or note..." />
+        <Textarea 
+          value={text} 
+          onChange={(event) => setText(event.target.value)} 
+          rows={5} 
+          placeholder="Capture thought, task, or note..." 
+          maxLength={50000}
+        />
         <div className="modal-actions">
-          <Button type="button" variant="secondary" onClick={() => {
-            if (text.trim()) addTask({ title: text.trim() });
-            setText("");
-            onOpenChange(false);
-          }}>
+          <Button 
+            type="button" 
+            variant="secondary" 
+            onClick={handleSaveTask}
+            disabled={submitting || !text.trim()}
+          >
             <PlusSquare size={14} />
             Save as Task
           </Button>
-          <Button type="button" variant="secondary" onClick={() => {
-            if (text.trim()) addNote(text.trim());
-            setText("");
-            onOpenChange(false);
-          }}>
+          <Button 
+            type="button" 
+            variant="secondary" 
+            onClick={handleSaveNote}
+            disabled={submitting || !text.trim()}
+          >
             <NotebookPen size={14} />
             Save as Note
           </Button>

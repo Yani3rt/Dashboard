@@ -1,6 +1,6 @@
 "use client";
 
-import { Check, Clock3, Pin, Play } from "lucide-react";
+import { Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { todayKey } from "@/lib/domain/date";
@@ -14,20 +14,27 @@ const statusLabel: Record<TaskStatus, string> = {
 };
 
 export const TaskList = ({ tasks }: { tasks: Task[] }) => {
-  const { updateTaskStatus, snoozeTask, pinTask } = useDashboard();
+  const { updateTaskStatus } = useDashboard();
 
   if (tasks.length === 0) {
-    return <p className="empty">No tasks in this view.</p>;
+    return (
+      <div className="empty-state">
+        <p className="empty">No Active Tasks.</p>
+        <p className="empty-hint">Enjoy your free time, or add a task!</p>
+      </div>
+    );
   }
 
   return (
     <ul className="stack-list">
       {tasks.map((task) => (
-        <li key={task.id} className="task-row">
+        <li key={task.id} className={`task-row ${task.status === "done" ? "task-done" : ""}`}>
           <div>
-            <h4>{task.title}</h4>
+            <h4 className={task.status === "done" ? "line-through opacity-70" : ""}>{task.title}</h4>
             <p>
-              {task.priority.toUpperCase()} · {statusLabel[task.status]}
+              <span className={task.status === "done" ? "text-success" : ""}>{task.priority.toUpperCase()}</span>
+              {" · "}
+              <span className={task.status === "done" ? "text-success" : ""}>{statusLabel[task.status]}</span>
               {task.dueDate ? ` · due ${task.dueDate}` : ""}
               {task.pinned ? " · pinned" : ""}
             </p>
@@ -47,19 +54,9 @@ export const TaskList = ({ tasks }: { tasks: Task[] }) => {
                 <Check size={14} />
                 Done
               </Button>
-            ) : null}
-            <Button type="button" variant="outline" size="sm" onClick={() => updateTaskStatus(task.id, "in_progress")}>
-              <Play size={14} />
-              Start
-            </Button>
-            <Button type="button" variant="outline" size="sm" onClick={() => snoozeTask(task.id)}>
-              <Clock3 size={14} />
-              Snooze
-            </Button>
-            <Button type="button" variant="outline" size="sm" onClick={() => pinTask(task.id)}>
-              <Pin size={14} />
-              Pin
-            </Button>
+            ) : (
+              <Badge variant="success">Completed</Badge>
+            )}
           </div>
         </li>
       ))}
